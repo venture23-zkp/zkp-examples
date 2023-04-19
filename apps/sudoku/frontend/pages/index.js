@@ -7,8 +7,8 @@ import addresses from "./config/addresses.json";
 // NOTE: crypto could not be imported for frontend, so used "require"
 const { createHash } = require('crypto');
 
+const snarkjs = require("snarkjs")
 
-const groth16 = require("snarkjs").groth16;
 
 const service = new IconService(
     new IconService.HttpProvider(network['39'].rpcUrls[0])
@@ -19,7 +19,7 @@ const IconConverter = IconService.IconConverter;
 async function generateGroth16Proof(input, wasmPath, zkeyPath) {
     const {
         proof: { pi_a, pi_b, pi_c },
-    } = await groth16.fullProve(input, wasmPath, zkeyPath);
+    } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
     return {
         a: [pi_a[0], pi_a[1]],
         b: [
@@ -106,6 +106,7 @@ export default function Sudoku() {
     const [board, setBoard] = useState();
     const [boardId, setBoardId] = useState();
     const [solved, setSolved] = useState();
+    const [circuitStats, setCircuitStats] = useState(null);
 
     // load boardId
     useEffect(() => {
@@ -164,13 +165,27 @@ export default function Sudoku() {
 
 
     const verifySudoku = async () => {
+        // load circuit stats
+        setCircuitStats(null)
+        const cs = await snarkjs.r1cs.info("/circuit/sudoku.r1cs");
+        setCircuitStats({
+            curve: cs.curve.name,
+            nConstraints: cs.nConstraints,
+            nLabels: cs.nLabels,
+            nOutputs: cs.nOutputs,
+            nPrvInputs: cs.nPrvInputs,
+            nPubInputs: cs.nPubInputs,
+            nVars: cs.nVars,
+        });
+
+        // generate proof
         const input = { boardId, board, solved }
         let params;
         try {
             const proof = await generateGroth16Proof(
                 input,
-                "/zkproof/sudoku.wasm",
-                "/zkproof/sudoku_final.zkey"
+                "/circuit/sudoku.wasm",
+                "/circuit/sudoku_final.zkey"
             )
             params = getParams({ ...proof, boardId })
         } catch (error) {
@@ -182,7 +197,7 @@ export default function Sudoku() {
             .to(addresses.sha256Sudoku)
             .method("verify")
             .params(params).build();
-            
+
         try {
             const res = await service.call(call).execute();
             if (!res) {
@@ -218,6 +233,22 @@ export default function Sudoku() {
                 ))
             }
             <button onClick={verifySudoku}>Verify</button>
+            {
+                circuitStats !== null ? (
+                    <div>
+                        <h3>Circuit Statistics</h3>
+                        <pre>
+                            Curve: {circuitStats.curve},
+                            Constraints: {circuitStats.nConstraints},
+                            Labels: {circuitStats.nLabels},
+                            Outputs: {circuitStats.nOutputs},
+                            PrvInputs: {circuitStats.nPrvInputs},
+                            PubInputs: {circuitStats.nPubInputs},
+                            Vars: {circuitStats.nVars},
+                        </pre>
+                    </div>
+                ) : null
+            }
         </div>
     );
 }
