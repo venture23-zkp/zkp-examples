@@ -1,0 +1,14 @@
+{
+    "selectedChain": "39",
+    "39": {
+      "chainId": "39",
+      "chainName": "iconzkp",
+      "rpcUrls": ["https://node.iconzkp.io/api/v3"],
+      "nativeCurrency": {
+        "symbol": "ICX"
+      },
+      "blockExplorerUrls": ["https://tracker.iconzkp.io/"]
+    }
+  
+  }
+  
