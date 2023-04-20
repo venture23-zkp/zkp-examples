@@ -1,9 +1,8 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/comparators.circom";
+include "./node_modules/circomlib/circuits/comparators.circom";
 
-
-template Sudoku() {
+template Puzzle() {
     signal input board[9][9];
     signal input solved[9][9];
 
@@ -121,6 +120,3 @@ template Sudoku() {
     }
 
 }
-
-// board is a public input signal. It is the board sudoku
-component main = Sudoku();

@@ -1,7 +1,7 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/sha256/sha256.circom";
+include "./node_modules/circomlib/circuits/bitify.circom";
+include "./node_modules/circomlib/circuits/sha256/sha256.circom";
 include "./puzzle.circom";
 
 
@@ -40,7 +40,7 @@ template SudokuSHA256() {
     signal input solved[9][9];
 
     component boardHasher = SHABoardHasher();
-    boardHasher.in <== board;
+    boardHasher.board <== board;
 
     boardHasher.out === boardId;
 
