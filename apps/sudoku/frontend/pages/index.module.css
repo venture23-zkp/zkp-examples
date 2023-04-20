@@ -3,10 +3,11 @@
     width: 100vw;
     background-color: #0f172a;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 20px 0
+    padding: 20px 0;
+    gap: 20px;
 }
 
 .input {
@@ -27,6 +28,15 @@
     }
 }
 
+.verificationContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    max-width: 450px;
+}
+
 .verifyButton {
     font-weight: 500;
     font-size: 1.125rem;
@@ -36,7 +46,6 @@
     border-style: none;
     width: 150px;
     border-radius: 4px;
-    margin: 10px 0;
     color: #cbd5e1;
     cursor: pointer
 }
@@ -49,4 +58,21 @@
     /* animation: shimmer 2.5s infinite; */
     font-size: 1rem;
     /* maxWidth: 200px; */
+}
+
+.circuitStats {
+    line-height: 1.5rem;
+    text-align: start;
+}
+
+.boardWarning {
+    color: #ffc106
+}
+
+.boardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
 }

@@ -13,8 +13,7 @@ const CustomToaster = () => (
             duration: 5000,
             style: {
                 background: '#303958',
-                color: '#fff',
-                fontFamily: "Arial, Helvetica, sans-serif"
+                color: '#fff'
             },
 
             // Default options for specific types

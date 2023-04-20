@@ -185,6 +185,7 @@ export default function Sudoku() {
         // generate proof
         const input = { boardId, board, solved }
         let params;
+
         try {
             const proof = await generateGroth16Proof(
                 input,
@@ -193,6 +194,7 @@ export default function Sudoku() {
             )
             params = getParams({ ...proof, boardId })
         } catch (error) {
+            console.log("error", error)
             toast.error("Failed to generate proof! error=" + error)
             return
         }
@@ -217,45 +219,50 @@ export default function Sudoku() {
     return board === undefined ? null : (
         <div align="center" className={style.soduku}>
             <Toaster />
-            <div className='board'>
+            <div className={style.boardContainer}>
+                <div className={style.boardWarning}>You can only update the input with value 0</div>
+                <div className='board'>
+                    {
+                        solved.map((row, rowIndex) => (
+                            <div key={rowIndex}>
+                                {
+                                    row.map((col, colIndex) => (
+                                        <input
+                                            key={colIndex}
+                                            className={style.input}
+                                            value={col}
+                                            onChange={event => {
+                                                if (board[rowIndex][colIndex] === 0) {
+                                                    updateSolution(rowIndex, colIndex, event.target.value);
+                                                }
+                                            }}
+                                        />
+                                    ))
+                                }
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+            <div className={style.verificationContainer}>
+                <button onClick={verifySudoku} className={style.verifyButton}>Verify</button>
                 {
-                    solved.map((row, rowIndex) => (
-                        <div key={rowIndex}>
-                            {
-                                row.map((col, colIndex) => (
-                                    <input
-                                        key={colIndex}
-                                        className={style.input}
-                                        value={col}
-                                        onChange={event => {
-                                            if (board[rowIndex][colIndex] === 0) {
-                                                updateSolution(rowIndex, colIndex, event.target.value);
-                                            }
-                                        }}
-                                    />
-                                ))
-                            }
+                    circuitStats !== null ? (
+                        <div className={style.circuitStatsContainer}>
+                            <h3>Circuit Statistics</h3>
+                            <div className={style.circuitStats}>
+                                Curve: {circuitStats.curve}, <br />
+                                Constraints: {circuitStats.nConstraints}, <br />
+                                Labels: {circuitStats.nLabels}, <br />
+                                Outputs: {circuitStats.nOutputs}, <br />
+                                PrvInputs: {circuitStats.nPrvInputs}, <br />
+                                PubInputs: {circuitStats.nPubInputs}, <br />
+                                Vars: {circuitStats.nVars}
+                            </div>
                         </div>
-                    ))
+                    ) : null
                 }
             </div>
-            <button onClick={verifySudoku} className={style.verifyButton}>Verify</button>
-            {
-                circuitStats !== null ? (
-                    <div className={style.circuitStatsContainer}>
-                        <h3>Circuit Statistics</h3>
-                        <pre>
-                            Curve: {circuitStats.curve},
-                            Constraints: {circuitStats.nConstraints},
-                            Labels: {circuitStats.nLabels},
-                            Outputs: {circuitStats.nOutputs},
-                            PrvInputs: {circuitStats.nPrvInputs},
-                            PubInputs: {circuitStats.nPubInputs},
-                            Vars: {circuitStats.nVars}
-                        </pre>
-                    </div>
-                ) : null
-            }
         </div>
     );
 }
