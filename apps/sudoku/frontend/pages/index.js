@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { IconService, CallBuilder } from 'icon-sdk-js';
 
+import "./index.module.css";
+
 import network from './config/network.json';
 import addresses from "./config/addresses.json";
 
@@ -211,7 +213,7 @@ export default function Sudoku() {
     };
 
     return board === undefined ? null : (
-        <div align="center">
+        <div align="center" style={Styles.board}>
             {
                 solved.map((row, rowIndex) => (
                     <div key={rowIndex}>
@@ -219,7 +221,7 @@ export default function Sudoku() {
                             row.map((col, colIndex) => (
                                 <input
                                     key={colIndex}
-                                    style={{ width: 50 }}
+                                    style={Styles.input}
                                     value={col}
                                     onChange={event => {
                                         if (board[rowIndex][colIndex] === 0) {
@@ -232,7 +234,7 @@ export default function Sudoku() {
                     </div>
                 ))
             }
-            <button onClick={verifySudoku}>Verify</button>
+            <button onClick={verifySudoku} style={Styles.verifyButton}>Verify</button>
             {
                 circuitStats !== null ? (
                     <div>
@@ -251,4 +253,40 @@ export default function Sudoku() {
             }
         </div>
     );
+}
+
+const Styles = {
+    board: {
+        minHeight: "100vh",
+        width: "100vw",
+        backgroundColor: "rgb(17 1 66)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    input: {
+        height: "3rem",
+        width: "3rem",
+        borderWidth: "2px",
+        backgroundColor: "transparent",
+        color: "rgb(175 132 248)",
+        fontSize: "1.5rem",
+        lineHeight: "2rem",
+        textAlign: "center",
+        borderStyle: "solid",
+        borderColor: "#cbd5e1"
+    },
+    verifyButton: {
+        fontWeight: "500",
+        fontSize: "1.125rem",
+        linHeight: "1.75rem",
+        padding: "0.75em 1.25em",
+        backgroundImage: "linear-gradient(to right,#9333ea, #4F46ED)",
+        borderStyle: "none",
+        width: "150px",
+        borderRadius: "4px",
+        margin: "10px 0",
+        color: "#cbd5e1"
+    }
 }
