@@ -237,7 +237,7 @@ export default function Sudoku() {
             <button onClick={verifySudoku} style={Styles.verifyButton}>Verify</button>
             {
                 circuitStats !== null ? (
-                    <div>
+                    <div style={Styles.circuitStatsContainer}>
                         <h3>Circuit Statistics</h3>
                         <pre>
                             Curve: {circuitStats.curve},
@@ -246,7 +246,7 @@ export default function Sudoku() {
                             Outputs: {circuitStats.nOutputs},
                             PrvInputs: {circuitStats.nPrvInputs},
                             PubInputs: {circuitStats.nPubInputs},
-                            Vars: {circuitStats.nVars},
+                            Vars: {circuitStats.nVars}
                         </pre>
                     </div>
                 ) : null
@@ -264,6 +264,7 @@ const Styles = {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        padding: "20px 0"
     },
     input: {
         height: "3rem",
@@ -287,6 +288,16 @@ const Styles = {
         width: "150px",
         borderRadius: "4px",
         margin: "10px 0",
-        color: "#cbd5e1"
+        color: "#cbd5e1",
+        cursor: "pointer"
+    },
+    circuitStatsContainer: {
+        color: "#cbd5e1",
+        //   display:inline-block;
+        // webkitMask: "linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%",
+        // backgroundRepeat: "no-repeat",
+        // animation: "shimmer 2.5s infinite",
+        fontSize: "1rem",
+        // maxWidth: "200px",
     }
 }
