@@ -10,7 +10,6 @@ const CustomToaster = () => (
         toastOptions={{
             // Define default options
             className: '',
-            duration: 5000,
             style: {
                 background: '#303958',
                 color: '#fff'
@@ -18,6 +17,9 @@ const CustomToaster = () => (
 
             // Default options for specific types
             success: {
+                duration: 5000
+            },
+            error: {
                 duration: 5000
             },
         }}

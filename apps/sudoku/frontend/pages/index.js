@@ -213,12 +213,16 @@ export default function Sudoku() {
         }
     };
 
-    const handleVerifyClick = () => {
-        toast.promise(verifySudoku(), {
-            loading: 'Verifying...',
-            success: 'Correct solution!',
-            error: (err) => err.toString(),
-        });
+    const handleVerifyClick = async () => {
+        const toastId = toast.loading('Verifying...');
+        try {
+            await verifySudoku();
+            toast.success("Correct solution!");
+        } catch (err) {
+            toast.error(err.toString());
+        } finally {
+            toast.remove(toastId);
+        }
     }
 
     return board === undefined ? null : (
