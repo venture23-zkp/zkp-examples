@@ -260,13 +260,13 @@ export default function Sudoku() {
                         <div className={style.circuitStatsContainer}>
                             <h3>Circuit Statistics</h3>
                             <div className={style.circuitStats}>
-                                Curve: {circuitStats.curve}, <br />
-                                Constraints: {circuitStats.nConstraints}, <br />
-                                Labels: {circuitStats.nLabels}, <br />
-                                Outputs: {circuitStats.nOutputs}, <br />
-                                PrvInputs: {circuitStats.nPrvInputs}, <br />
-                                PubInputs: {circuitStats.nPubInputs}, <br />
-                                Vars: {circuitStats.nVars}
+                                <div className={style.key}>Curve</div> <div className={style.value}>{circuitStats.curve}</div>
+                                <div className={style.key}>Constraints</div> <div className={style.value}>{circuitStats.nConstraints}</div>
+                                <div className={style.key}>Labels</div> <div className={style.value}>{circuitStats.nLabels}</div>
+                                <div className={style.key}>Outputs</div> <div className={style.value}>{circuitStats.nOutputs}</div>
+                                <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats.nPrvInputs}</div>
+                                <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats.nPubInputs}</div>
+                                <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats.nVars}</div>
                             </div>
                         </div>
                     ) : null
