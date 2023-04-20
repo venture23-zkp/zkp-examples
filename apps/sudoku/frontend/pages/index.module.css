@@ -71,19 +71,33 @@
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     min-width: 350px;
-    padding: 0 30px 20px;
+    overflow: hidden;
+    min-height: 325px;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .circuitStats {
     line-height: 1.5rem;
     text-align: start;
+    width: 100%;
 
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 1em;
 }
 
-.boardWarning {
+.tabBody {
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+circuitStatsInActive .boardWarning {
     color: #ffc106
 }
 
@@ -101,4 +115,27 @@
     font-weight: bold;
 }
 
-.value {}
+.tabHeadersContainer {
+    display: flex;
+    flex-direction: row;
+    width: "100%";
+    justify-content: space-around;
+}
+
+.tabHeader {
+    flex: 1;
+    cursor: pointer;
+}
+
+.tabHeaderActive {
+    background-image: linear-gradient(to right, #9333ea, #4F46ED);
+}
+
+.tabHeaderInActive {}
+
+.circuitLoadingContainer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

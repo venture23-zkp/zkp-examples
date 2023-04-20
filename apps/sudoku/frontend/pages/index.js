@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { IconService, CallBuilder } from 'icon-sdk-js';
+import GridLoader from "react-spinners/GridLoader";
 
 import style from "./index.module.css";
 
@@ -18,6 +19,19 @@ const service = new IconService(
 );
 const IconConverter = IconService.IconConverter;
 
+const circuits = [{
+    id: 'sha256',
+    title: "SHA256",
+    staticPath: "/circuit/sha256",
+    verifyMethod: "verify" // will in the future be verifySHA256
+}, {
+    id: 'pedersen',
+    title: "Pedersen",
+    // staticPath: "/circuit/pedersen",
+    staticPath: "/circuit/sha256",
+    verifyMethod: "verify", // will in the future be verifyPedersen
+}]
+
 
 async function generateGroth16Proof(input, wasmPath, zkeyPath) {
     const {
@@ -35,7 +49,7 @@ async function generateGroth16Proof(input, wasmPath, zkeyPath) {
 
 async function fetchRandomBoardId() {
     const call = new CallBuilder()
-        .to(addresses.sha256Sudoku)
+        .to(addresses.sudoku)
         .method("getRandomBoardId")
         .build();
     return await service.call(call).execute();
@@ -43,7 +57,7 @@ async function fetchRandomBoardId() {
 
 async function fetchBoardData(boardId) {
     const call = new CallBuilder()
-        .to(addresses.sha256Sudoku)
+        .to(addresses.sudoku)
         .method("getBoardData")
         .params({ id: `0x${boardId.toString(16)}` })
         .build();
@@ -109,8 +123,10 @@ export default function Sudoku() {
     const [board, setBoard] = useState();
     const [boardId, setBoardId] = useState();
     const [solved, setSolved] = useState();
-    const [circuitStats, setCircuitStats] = useState(null);
     const { Toaster, toast } = useCustomToast();
+    const [selectedCircuit, setSelectedCircuit] = useState(circuits[0])
+    const [circuitStats, setCircuitStats] = useState(circuits.reduce((acc, current) => { acc[current.id] = undefined; return acc }, {}))
+    const [circuitStatsLoading, setCircuitStatsLoading] = useState(false);
 
     // load boardId
     useEffect(() => {
@@ -151,6 +167,38 @@ export default function Sudoku() {
 
     }, [boardId])
 
+    // load circuit info
+    useEffect(() => {
+        (async () => {
+            setCircuitStatsLoading(true);
+            try {
+                let cs;
+                if (circuitStats[selectedCircuit.id]) {
+                    return;
+                } else {
+                    cs = await snarkjs.r1cs.info(`${selectedCircuit.staticPath}/sudoku.r1cs`);
+                }
+
+                setCircuitStats({
+                    ...circuitStats,
+                    [selectedCircuit.id]: {
+                        curve: cs.curve.name,
+                        nConstraints: cs.nConstraints,
+                        nLabels: cs.nLabels,
+                        nOutputs: cs.nOutputs,
+                        nPrvInputs: cs.nPrvInputs,
+                        nPubInputs: cs.nPubInputs,
+                        nVars: cs.nVars,
+                    }
+                });
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setCircuitStatsLoading(false);
+            }
+        })();
+    }, [selectedCircuit])
+
 
     const updateSolution = useCallback((i, j, value) => {
         const newSolution = JSON.parse(JSON.stringify(solved));
@@ -168,29 +216,17 @@ export default function Sudoku() {
     };
 
 
-    const verifySudoku = async () => {
-        // load circuit stats
-        setCircuitStats(null)
-        const cs = await snarkjs.r1cs.info("/circuit/sudoku.r1cs");
-        setCircuitStats({
-            curve: cs.curve.name,
-            nConstraints: cs.nConstraints,
-            nLabels: cs.nLabels,
-            nOutputs: cs.nOutputs,
-            nPrvInputs: cs.nPrvInputs,
-            nPubInputs: cs.nPubInputs,
-            nVars: cs.nVars,
-        });
-
+    const verifySudoku = useCallback(async (circuit) => {
         // generate proof
         const input = { boardId, board, solved }
         let params;
 
         try {
+            console.log(selectedCircuit.staticPath);
             const proof = await generateGroth16Proof(
                 input,
-                "/circuit/sudoku.wasm",
-                "/circuit/sudoku_final.zkey"
+                `${selectedCircuit.staticPath}/sudoku.wasm`,
+                `${selectedCircuit.staticPath}/sudoku_final.zkey`
             )
             params = getParams({ ...proof, boardId })
         } catch (error) {
@@ -199,8 +235,8 @@ export default function Sudoku() {
         }
 
         const call = new CallBuilder()
-            .to(addresses.sha256Sudoku)
-            .method("verify")
+            .to(addresses.sudoku)
+            .method(`${selectedCircuit.verifyMethod}`)
             .params(params).build();
 
         try {
@@ -211,12 +247,12 @@ export default function Sudoku() {
         } catch (error) {
             throw Error("Failed to verify using RPC! error=" + error);
         }
-    };
+    }, [boardId, board, solved]);
 
     const handleVerifyClick = async () => {
         const toastId = toast.loading('Verifying...');
         try {
-            await verifySudoku();
+            await verifySudoku(selectedCircuit);
             toast.success("Correct solution!");
         } catch (err) {
             toast.error(err.toString());
@@ -254,24 +290,48 @@ export default function Sudoku() {
                 </div>
             </div>
             <div className={style.verificationContainer}>
-                <button onClick={handleVerifyClick} className={style.verifyButton}>Verify</button>
                 {
                     circuitStats !== null ? (
                         <div className={style.circuitStatsContainer}>
-                            <h3>Circuit Statistics</h3>
-                            <div className={style.circuitStats}>
-                                <div className={style.key}>Curve</div> <div className={style.value}>{circuitStats.curve}</div>
-                                <div className={style.key}>Constraints</div> <div className={style.value}>{circuitStats.nConstraints}</div>
-                                <div className={style.key}>Labels</div> <div className={style.value}>{circuitStats.nLabels}</div>
-                                <div className={style.key}>Outputs</div> <div className={style.value}>{circuitStats.nOutputs}</div>
-                                <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats.nPrvInputs}</div>
-                                <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats.nPubInputs}</div>
-                                <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats.nVars}</div>
+                            <div className={style.tabHeadersContainer}>
+                                {
+                                    circuits.map((circuit, idx) => (
+                                        <div className={circuit.id === selectedCircuit.id ?
+                                            `${style.tabHeader} ${style.tabHeaderActive}` :
+                                            `${style.tabHeader} ${style.tabHeaderInActive}`
+                                        } onClick={() => setSelectedCircuit(circuit)} key={idx}>
+                                            <h3>{circuit.title}</h3>
+                                        </div>
+                                    ))
+                                }
                             </div>
+                            {
+                                circuitStatsLoading ?
+                                    <div className={style.circuitLoadingContainer}>
+                                        <GridLoader
+                                            color={"#4F46ED"}
+                                            loading={circuitStatsLoading}
+                                        />
+                                    </div> :
+                                    <div className={style.tabBody}>
+                                        <div className={style.circuitStats}>
+                                            <div className={style.key}>Curve</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.curve}</div>
+                                            <div className={style.key}>Constraints</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nConstraints}</div>
+                                            <div className={style.key}>Labels</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nLabels}</div>
+                                            <div className={style.key}>Outputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nOutputs}</div>
+                                            <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPrvInputs}</div>
+                                            <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPubInputs}</div>
+                                            <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
+                                        </div>
+                                        <div>
+                                            <button onClick={handleVerifyClick} className={style.verifyButton}>Verify</button>
+                                        </div>
+                                    </div>
+                            }
                         </div>
                     ) : null
                 }
             </div>
-        </div>
+        </div >
     );
 }
