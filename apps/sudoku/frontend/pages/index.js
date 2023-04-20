@@ -195,8 +195,7 @@ export default function Sudoku() {
             params = getParams({ ...proof, boardId })
         } catch (error) {
             console.log("error", error)
-            toast.error("Failed to generate proof! error=" + error)
-            return
+            throw Error("Failed to generate proof! error=" + error)
         }
 
         const call = new CallBuilder()
@@ -207,14 +206,20 @@ export default function Sudoku() {
         try {
             const res = await service.call(call).execute();
             if (!res) {
-                toast.error("Wrong solution!")
-            } else {
-                toast.success("Correct solution!")
+                throw Error("Wrong solution!")
             }
         } catch (error) {
-            alert("Failed to verify using RPC! error=" + error);
+            throw Error("Failed to verify using RPC! error=" + error);
         }
     };
+
+    const handleVerifyClick = () => {
+        toast.promise(verifySudoku(), {
+            loading: 'Verifying...',
+            success: 'Correct solution!',
+            error: (err) => err.toString(),
+        });
+    }
 
     return board === undefined ? null : (
         <div align="center" className={style.soduku}>
@@ -245,7 +250,7 @@ export default function Sudoku() {
                 </div>
             </div>
             <div className={style.verificationContainer}>
-                <button onClick={verifySudoku} className={style.verifyButton}>Verify</button>
+                <button onClick={handleVerifyClick} className={style.verifyButton}>Verify</button>
                 {
                     circuitStats !== null ? (
                         <div className={style.circuitStatsContainer}>
