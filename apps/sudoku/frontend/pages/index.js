@@ -9,8 +9,9 @@ import addresses from "./config/addresses.json";
 // NOTE: crypto could not be imported for frontend, so used "require"
 const { createHash } = require('crypto');
 
-const snarkjs = require("snarkjs")
+const snarkjs = require("snarkjs");
 
+import useCustomToast from '../hooks/useCustomToast';
 
 const service = new IconService(
     new IconService.HttpProvider(network['39'].rpcUrls[0])
@@ -109,6 +110,7 @@ export default function Sudoku() {
     const [boardId, setBoardId] = useState();
     const [solved, setSolved] = useState();
     const [circuitStats, setCircuitStats] = useState(null);
+    const { Toaster, toast } = useCustomToast();
 
     // load boardId
     useEffect(() => {
@@ -191,7 +193,7 @@ export default function Sudoku() {
             )
             params = getParams({ ...proof, boardId })
         } catch (error) {
-            alert("Failed to generate proof! error=" + error)
+            toast.error("Failed to generate proof! error=" + error)
             return
         }
 
@@ -203,9 +205,9 @@ export default function Sudoku() {
         try {
             const res = await service.call(call).execute();
             if (!res) {
-                alert("Wrong solution!")
+                toast.error("Wrong solution!")
             } else {
-                alert("Correct solution!")
+                toast.success("Correct solution!")
             }
         } catch (error) {
             alert("Failed to verify using RPC! error=" + error);
@@ -214,6 +216,7 @@ export default function Sudoku() {
 
     return board === undefined ? null : (
         <div align="center" style={Styles.board}>
+            <Toaster />
             {
                 solved.map((row, rowIndex) => (
                     <div key={rowIndex}>
