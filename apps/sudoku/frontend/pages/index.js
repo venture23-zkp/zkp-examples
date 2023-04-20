@@ -127,6 +127,7 @@ export default function Sudoku() {
     const [selectedCircuit, setSelectedCircuit] = useState(circuits[0])
     const [circuitStats, setCircuitStats] = useState(circuits.reduce((acc, current) => { acc[current.id] = undefined; return acc }, {}))
     const [circuitStatsLoading, setCircuitStatsLoading] = useState(false);
+    const [verificationInProgress, setVerificationInProgress] = useState(false);
 
     // load boardId
     useEffect(() => {
@@ -251,6 +252,7 @@ export default function Sudoku() {
 
     const handleVerifyClick = async () => {
         const toastId = toast.loading('Verifying...');
+        setVerificationInProgress(true);
         try {
             await verifySudoku(selectedCircuit);
             toast.success("Correct solution!");
@@ -258,6 +260,7 @@ export default function Sudoku() {
             toast.error(err.toString());
         } finally {
             toast.remove(toastId);
+            setVerificationInProgress(false);
         }
     }
 
@@ -324,7 +327,13 @@ export default function Sudoku() {
                                             <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
                                         </div>
                                         <div>
-                                            <button onClick={handleVerifyClick} className={style.verifyButton}>Verify</button>
+                                            <button
+                                                onClick={handleVerifyClick}
+                                                className={`${style.verifyButton} ${verificationInProgress ? style.disabledButton : ""}`}
+                                                disabled={verificationInProgress}
+                                            >
+                                                Verify
+                                            </button>
                                         </div>
                                     </div>
                             }

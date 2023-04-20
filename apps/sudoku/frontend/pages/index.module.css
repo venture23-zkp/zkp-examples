@@ -139,3 +139,8 @@ circuitStatsInActive .boardWarning {
     align-items: center;
     justify-content: center;
 }
+
+.disabledButton {
+    cursor: initial;
+    opacity: 0.4;
+}
