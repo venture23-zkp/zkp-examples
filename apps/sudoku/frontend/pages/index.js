@@ -215,28 +215,30 @@ export default function Sudoku() {
     };
 
     return board === undefined ? null : (
-        <div align="center" className={style.board}>
+        <div align="center" className={style.soduku}>
             <Toaster />
-            {
-                solved.map((row, rowIndex) => (
-                    <div key={rowIndex}>
-                        {
-                            row.map((col, colIndex) => (
-                                <input
-                                    key={colIndex}
-                                    className={style.input}
-                                    value={col}
-                                    onChange={event => {
-                                        if (board[rowIndex][colIndex] === 0) {
-                                            updateSolution(rowIndex, colIndex, event.target.value);
-                                        }
-                                    }}
-                                />
-                            ))
-                        }
-                    </div>
-                ))
-            }
+            <div className='board'>
+                {
+                    solved.map((row, rowIndex) => (
+                        <div key={rowIndex}>
+                            {
+                                row.map((col, colIndex) => (
+                                    <input
+                                        key={colIndex}
+                                        className={style.input}
+                                        value={col}
+                                        onChange={event => {
+                                            if (board[rowIndex][colIndex] === 0) {
+                                                updateSolution(rowIndex, colIndex, event.target.value);
+                                            }
+                                        }}
+                                    />
+                                ))
+                            }
+                        </div>
+                    ))
+                }
+            </div>
             <button onClick={verifySudoku} className={style.verifyButton}>Verify</button>
             {
                 circuitStats !== null ? (
