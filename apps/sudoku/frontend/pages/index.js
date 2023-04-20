@@ -262,7 +262,7 @@ const Styles = {
     board: {
         minHeight: "100vh",
         width: "100vw",
-        backgroundColor: "rgb(17 1 66)",
+        backgroundColor: "#0f172a",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -274,7 +274,7 @@ const Styles = {
         width: "3rem",
         borderWidth: "2px",
         backgroundColor: "transparent",
-        color: "rgb(175 132 248)",
+        color: "#818cf8",
         fontSize: "1.5rem",
         lineHeight: "2rem",
         textAlign: "center",
