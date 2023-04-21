@@ -11,7 +11,7 @@ template PedersenBoardHasher() {
     signal output out;
 
     component board_n2b[9][9];
-    component pedersen = Pedersen(328); // 81 * 4 bits + 4 bits for byte alignment
+    component pedersen = Pedersen(328); // 81 * 4 bits + 4 bits for the byte alignment
     pedersen.in[0] <== 0;
     pedersen.in[1] <== 0;
     pedersen.in[2] <== 0;

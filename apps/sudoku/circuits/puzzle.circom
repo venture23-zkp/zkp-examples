@@ -6,7 +6,7 @@ template Puzzle() {
     signal input board[9][9];
     signal input solved[9][9];
 
-    // Check if the numbers of the solved sudoku are >=1 and <=9
+    // Check if the numbers of the solved sudoku are >=1 and <=9 matches
     // Each number in the solved sudoku is checked to see if it is >=1 and <=9
 
     component getone[9][9];

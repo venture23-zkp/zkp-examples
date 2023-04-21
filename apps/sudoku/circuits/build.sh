@@ -19,6 +19,8 @@ finalPotFileName="$ptauDir/pot${maxConstraints}_${curveName}.ptau"
 mkdir -p $ptauDir
 mkdir -p $buildDir
 
+# compile the citcuit
+
 circom ${circuitName}.circom --r1cs --wasm --prime ${curveName} -o ${buildDir}
 
 cd ${buildDir}
