@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "circomlibjs": "^0.1.6",
+    "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.1",
     "ethers": "^5.6.9",
     "icon-sdk-js": "^1.4.0",
