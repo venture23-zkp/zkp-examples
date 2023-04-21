@@ -27,9 +27,8 @@ const circuits = [{
 }, {
     id: 'pedersen',
     title: "Pedersen",
-    // staticPath: "/circuit/pedersen",
-    staticPath: "/circuit/sha256",
-    verifyMethod: "verify", // will in the future be verifyPedersen
+    staticPath: "/circuit/pedersen",
+    // verifyMethod: "verify", // will in the future be verifyPedersen
 }]
 
 
@@ -223,11 +222,11 @@ export default function Sudoku() {
         let params;
 
         try {
-            console.log(selectedCircuit.staticPath);
+            console.log(circuit.staticPath);
             const proof = await generateGroth16Proof(
                 input,
-                `${selectedCircuit.staticPath}/sudoku.wasm`,
-                `${selectedCircuit.staticPath}/sudoku_final.zkey`
+                `${circuit.staticPath}/sudoku.wasm`,
+                `${circuit.staticPath}/sudoku_final.zkey`
             )
             params = getParams({ ...proof, boardId })
         } catch (error) {
@@ -237,7 +236,7 @@ export default function Sudoku() {
 
         const call = new CallBuilder()
             .to(addresses.sudoku)
-            .method(`${selectedCircuit.verifyMethod}`)
+            .method(`${circuit.verifyMethod}`)
             .params(params).build();
 
         try {
@@ -326,15 +325,18 @@ export default function Sudoku() {
                                             <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPubInputs}</div>
                                             <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
                                         </div>
-                                        <div>
-                                            <button
-                                                onClick={handleVerifyClick}
-                                                className={`${style.verifyButton} ${verificationInProgress ? style.disabledButton : ""}`}
-                                                disabled={verificationInProgress}
-                                            >
-                                                Verify
-                                            </button>
-                                        </div>
+                                        {
+                                            selectedCircuit.verifyMethod ?
+                                                <div>
+                                                    <button
+                                                        onClick={handleVerifyClick}
+                                                        className={`${style.verifyButton} ${verificationInProgress ? style.disabledButton : ""}`}
+                                                        disabled={verificationInProgress}
+                                                    >
+                                                        Verify
+                                                    </button>
+                                                </div> : <></>
+                                        }
                                     </div>
                             }
                         </div>
