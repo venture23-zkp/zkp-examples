@@ -1,5 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { IconService, CallBuilder } from 'icon-sdk-js';
+import { buildPedersenHash } from "circomlibjs"
+// NOTE: crypto could not be imported for frontend, so used "require"
+const { createHash } = require('crypto');
 import GridLoader from "react-spinners/GridLoader";
 
 import style from "./index.module.css";
@@ -7,8 +10,6 @@ import style from "./index.module.css";
 import network from './config/network.json';
 import addresses from "./config/addresses.json";
 
-// NOTE: crypto could not be imported for frontend, so used "require"
-const { createHash } = require('crypto');
 
 const snarkjs = require("snarkjs");
 
@@ -23,13 +24,10 @@ const circuits = [{
     id: 'sha256',
     title: "SHA256",
     staticPath: "/circuit/sha256",
-    verifyMethod: "verify" // will in the future be verifySHA256
 }, {
     id: 'pedersen',
     title: "Pedersen",
-    // staticPath: "/circuit/pedersen",
-    staticPath: "/circuit/sha256",
-    verifyMethod: "verify", // will in the future be verifyPedersen
+    staticPath: "/circuit/pedersen",
 }]
 
 
@@ -47,51 +45,42 @@ async function generateGroth16Proof(input, wasmPath, zkeyPath) {
     }
 }
 
-async function fetchRandomBoardId() {
+async function fetchRandomBoard() {
     const call = new CallBuilder()
         .to(addresses.sudoku)
-        .method("getRandomBoardId")
+        .method("getRandomBoard")
         .build();
     return await service.call(call).execute();
 }
 
-async function fetchBoardData(boardId) {
-    const call = new CallBuilder()
-        .to(addresses.sudoku)
-        .method("getBoardData")
-        .params({ id: `0x${boardId.toString(16)}` })
-        .build();
-    return await service.call(call).execute();
+function mirror_bits(b) {
+    let sum = 0
+    for (let i = 0; i < 8; i++) {
+        sum += ((b & (1 << i)) >> i) << (7 - i)
+    }
+    return sum
 }
 
-// function mirror_bits(b) {
-//     let sum = 0
-//     for (let i = 0; i < 8; i++) {
-//         sum += ((b & (1 << i)) >> i) << (7 - i)
-//     }
-//     return sum
-// }
-
-// async function getBoardHash(board) {
-//     const pedersen = await buildPedersenHash();
-//     board = board.flat()
-//     let e1, e2;
-//     const data = new Uint8Array(41); // 328 / 8
-//     for (let i = 0; i < 41; i++) {
-//         e1 = i === 0 ? 0 : board[2 * i - 1]
-//         e2 = board[2 * i];
-//         data[i] = mirror_bits(e1 * 16 + e2);
-//     }
-//     const packed = pedersen.hash(data)
-//     const res = pedersen.babyJub.unpackPoint(packed)
-//     return pedersen.babyJub.F.toObject(res[0])
-// }
+async function pedersenBoardHash(board) {
+    const pedersen = await buildPedersenHash();
+    board = board.flat()
+    let e1, e2;
+    const data = new Uint8Array(41); // 328 / 8
+    for (let i = 0; i < 41; i++) {
+        e1 = i === 0 ? 0 : board[2 * i - 1]
+        e2 = board[2 * i];
+        data[i] = mirror_bits(e1 * 16 + e2);
+    }
+    const packed = pedersen.hash(data)
+    const res = pedersen.babyJub.unpackPoint(packed)
+    return pedersen.babyJub.F.toObject(res[0])
+}
 
 function sha256(data) {
     return createHash('sha256').update(data).digest('hex');
 }
 
-function sha256HashBoard(board) {
+function sha256BoardHash(board) {
     board = board.flat()
     let e1, e2;
     const data = new Uint8Array(41); // 328 / 8
@@ -103,25 +92,10 @@ function sha256HashBoard(board) {
     return BigInt("0x" + sha256(data))
 }
 
-// async function getBoardHash(board) {
-//     const pedersen = await buildPedersenHash();
-//     board = board.flat()
-//     let e1, e2;
-//     const data = new Uint8Array(41); // 328 / 8
-//     for (let i = 0; i < 41; i++) {
-//         e1 = i === 0 ? 0 : board[2 * i - 1]
-//         e2 = board[2 * i];
-//         data[i] = mirror_bits(e1 * 16 + e2);
-//     }
-//     const packed = pedersen.hash(data)
-//     const res = pedersen.babyJub.unpackPoint(packed)
-//     return pedersen.babyJub.F.toObject(res[0])
-// }
-
 export default function Sudoku() {
 
     const [board, setBoard] = useState();
-    const [boardId, setBoardId] = useState();
+    const [boardIds, setBoardIds] = useState();
     const [solved, setSolved] = useState();
     const { Toaster, toast } = useCustomToast();
     const [selectedCircuit, setSelectedCircuit] = useState(circuits[0])
@@ -129,47 +103,39 @@ export default function Sudoku() {
     const [circuitStatsLoading, setCircuitStatsLoading] = useState(false);
     const [verificationInProgress, setVerificationInProgress] = useState(false);
 
-    // load boardId
-    useEffect(() => {
-        fetchRandomBoardId()
-            .then(boardIdHex => {
-                // setBoardId(BigInt(boardIdHex))
-                setBoardId(12946702913587076100588339357837874244737833722059782620840121604018902625880n)
-            })
-            .catch(error => {
-                alert(`Failed to load boardId: error = ${error}`)
-            })
-    }, [])
-
     // load board
     useEffect(() => {
-        if (boardId === undefined) return;
+        fetchRandomBoard()
+            .then(async info => {
+                const { sha256Id: hexSha256Id, pedersenId: hexPedersenId, data: hexData } = info;
 
-        fetchBoardData(boardId)
-            .then(boardHex => {
-
-                const board = boardHex.map(row => {
+                const board = hexData.map(row => {
                     return row.map(col => parseInt(col, 16));
                 });
 
-                const boardHash = sha256HashBoard(board)
-                console.log(boardHash)
-                if (boardId !== boardHash) {
-                    alert(`Invalid board: Hash does not match id = ${boardId}`)
+                const sha256Id = sha256BoardHash(board)
+                const pedersenId = await pedersenBoardHash(board)
+                if (BigInt(hexSha256Id) !== sha256Id || BigInt(hexPedersenId) !== pedersenId) {
+                    alert(`Invalid board: Board does not match data!`)
                     return
                 }
 
+                return { sha256Id, pedersenId, board }
+            })
+            .then(({ sha256Id, pedersenId, board }) => {
+                setBoardIds({ sha256: sha256Id, pedersen: pedersenId })
                 setBoard(board)
                 setSolved(board)
             })
             .catch(error => {
-                alert(`Failed to load board: id = ${boardId}, error = ${error}`)
+                alert(`Failed to load a random board! error = ${error}`)
             })
 
-    }, [boardId])
+    }, [])
 
     // load circuit info
     useEffect(() => {
+
         (async () => {
             setCircuitStatsLoading(true);
             try {
@@ -179,7 +145,6 @@ export default function Sudoku() {
                 } else {
                     cs = await snarkjs.r1cs.info(`${selectedCircuit.staticPath}/sudoku.r1cs`);
                 }
-
                 setCircuitStats({
                     ...circuitStats,
                     [selectedCircuit.id]: {
@@ -190,14 +155,16 @@ export default function Sudoku() {
                         nPrvInputs: cs.nPrvInputs,
                         nPubInputs: cs.nPubInputs,
                         nVars: cs.nVars,
+                        proofTime: 0,
                     }
                 });
             } catch (err) {
-                console.log(err);
+                console.error(err);
             } finally {
                 setCircuitStatsLoading(false);
             }
         })();
+
     }, [selectedCircuit])
 
 
@@ -207,37 +174,39 @@ export default function Sudoku() {
         setSolved(newSolution);
     })
 
-    const getParams = ({ a, b, c, boardId }) => {
-        return {
-            a: a.map(IconConverter.toHexNumber),
-            b: b.map(row => row.map(IconConverter.toHexNumber).reverse()),
-            c: c.map(IconConverter.toHexNumber),
-            boardId: IconConverter.toHexNumber(boardId)
-        }
-    };
 
-
-    const verifySudoku = useCallback(async (circuit) => {
+    const verifySudoku = useCallback(async () => {
         // generate proof
-        const input = { boardId, board, solved }
         let params;
-
+        const boardId = boardIds[selectedCircuit.id]
         try {
-            console.log(selectedCircuit.staticPath);
+            const startTime = Date.now();
             const proof = await generateGroth16Proof(
-                input,
+                { boardId, board, solved },
                 `${selectedCircuit.staticPath}/sudoku.wasm`,
                 `${selectedCircuit.staticPath}/sudoku_final.zkey`
             )
-            params = getParams({ ...proof, boardId })
+            setCircuitStats({
+                ...circuitStats,
+                [selectedCircuit.id]: {
+                    ...circuitStats[selectedCircuit.id],
+                    proofTime: Date.now() - startTime,
+                }
+            });
+            params = {
+                a: proof.a.map(IconConverter.toHexNumber),
+                b: proof.b.map(row => row.map(IconConverter.toHexNumber).reverse()),
+                c: proof.c.map(IconConverter.toHexNumber),
+                boardId: IconConverter.toHexNumber(boardId)
+            }
         } catch (error) {
-            console.log("error", error)
-            throw Error("Failed to generate proof! error=" + error)
+            console.error(error)
+            throw Error("Failed to generate proof!")
         }
 
         const call = new CallBuilder()
             .to(addresses.sudoku)
-            .method(`${selectedCircuit.verifyMethod}`)
+            .method("verify")
             .params(params).build();
 
         try {
@@ -248,7 +217,7 @@ export default function Sudoku() {
         } catch (error) {
             throw Error("Failed to verify using RPC! error=" + error);
         }
-    }, [boardId, board, solved]);
+    }, [boardIds, selectedCircuit, circuitStats, board, solved]);
 
     const handleVerifyClick = async () => {
         const toastId = toast.loading('Verifying...');
@@ -325,6 +294,7 @@ export default function Sudoku() {
                                             <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPrvInputs}</div>
                                             <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPubInputs}</div>
                                             <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
+                                            <div className={style.key}>Proof time</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.proofTime}ms</div>
                                         </div>
                                         <div>
                                             <button
