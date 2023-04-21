@@ -309,7 +309,7 @@ export default function Sudoku() {
                             </div>
                             {
                                 circuitStatsLoading ?
-                                    <div className={style.circuitLoadingContainer}>
+                                    <div className={`${style.tabBody} ${style.circuitLoadingContainer}`}>
                                         <GridLoader
                                             color={"#4F46ED"}
                                             loading={circuitStatsLoading}
