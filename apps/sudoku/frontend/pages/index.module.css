@@ -1,0 +1,146 @@
+.soduku {
+    min-height: 100vh;
+    width: 100vw;
+    background-color: #0f172a;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    gap: 20px;
+
+    @media (max-width: 992px) {
+        flex-direction: column
+    }
+}
+
+.input {
+    height: 3rem;
+    width: 3rem;
+    border-width: 2px;
+    background-color: transparent;
+    color: #818cf8;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    text-align: center;
+    border-style: solid;
+    border-color: #cbd5e1;
+
+    @media (max-width: 992px) {
+        height: 2rem;
+        width: 2rem;
+    }
+}
+
+.verificationContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    max-width: 450px;
+}
+
+.verifyButton {
+    font-weight: 500;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    padding: 0.75em 1.25em;
+    background-image: linear-gradient(to right, #9333ea, #4F46ED);
+    border-style: none;
+    width: 150px;
+    border-radius: 4px;
+    color: #cbd5e1;
+    cursor: pointer
+}
+
+.circuitStatsContainer {
+    color: #ffffff;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    min-width: 350px;
+    overflow: hidden;
+    min-height: 325px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.circuitStats {
+    line-height: 1.5rem;
+    text-align: start;
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1em;
+}
+
+.tabBody {
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.boardWarning {
+    color: #ffc106
+}
+
+.boardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.key {
+    text-transform: uppercase;
+    color: #818cf8;
+    font-weight: bold;
+}
+
+.tabHeadersContainer {
+    display: flex;
+    flex-direction: row;
+    width: "100%";
+    justify-content: space-around;
+}
+
+.tabHeader {
+    flex: 1;
+    cursor: pointer;
+}
+
+.tabHeaderActive {
+    background-image: linear-gradient(to right, #9333ea, #4F46ED);
+}
+
+.tabHeaderInActive {}
+
+.circuitLoadingContainer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.disabledButton {
+    cursor: initial;
+    opacity: 0.4;
+}
