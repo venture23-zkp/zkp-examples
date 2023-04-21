@@ -27,7 +27,7 @@ template PedersenBoardHasher() {
         }
     }
 
-    pedersen.out[0] ==> out;
+    out <== pedersen.out[0];
 }
 
 template SudokuPedersen() {
@@ -37,7 +37,6 @@ template SudokuPedersen() {
 
     component boardHasher = PedersenBoardHasher();
     boardHasher.board <== board;
-
     boardHasher.out === boardId;
 
     component puzzle = Puzzle();

@@ -5,7 +5,7 @@ include "./node_modules/circomlib/circuits/sha256/sha256.circom";
 include "./puzzle.circom";
 
 
-template SHABoardHasher() {
+template Sha256BoardHasher() {
     signal input board[9][9];
     signal output out;
 
@@ -31,17 +31,16 @@ template SHABoardHasher() {
         boardHash.in[i] <== sha256.out[255 - i];
     }
 
-    boardHash.out ==> out;
+    out <== boardHash.out;
 }
 
-template SudokuSHA256() {
+template SudokuSha256() {
     signal input boardId;
     signal input board[9][9];
     signal input solved[9][9];
 
-    component boardHasher = SHABoardHasher();
+    component boardHasher = Sha256BoardHasher();
     boardHasher.board <== board;
-
     boardHasher.out === boardId;
 
     component puzzle = Puzzle();
@@ -50,4 +49,4 @@ template SudokuSHA256() {
 }
 
 
-component main {public [boardId]} = SudokuSHA256();
+component main {public [boardId]} = SudokuSha256();
