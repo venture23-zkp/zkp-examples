@@ -5,7 +5,6 @@ include "./node_modules/circomlib/circuits/pedersen.circom";
 include "./puzzle.circom";
 
 
-
 template PedersenBoardHasher() {
     signal input board[9][9];
     signal output out;
@@ -18,7 +17,6 @@ template PedersenBoardHasher() {
     pedersen.in[3] <== 0;
     for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
-            log(board[i][j]);
             board_n2b[i][j] = Num2Bits(4);
             board_n2b[i][j].in <== board[i][j];
             var index = 4 + 4 * (9 * i + j);
@@ -29,7 +27,7 @@ template PedersenBoardHasher() {
         }
     }
 
-    // pedersen.out[0] ==> out;
+    pedersen.out[0] ==> out;
 }
 
 template SudokuPedersen() {

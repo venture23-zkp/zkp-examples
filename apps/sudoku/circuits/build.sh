@@ -1,17 +1,22 @@
 #!/bin/bash
 set -e
 
-curveName=bls12381
 maxConstraints=16
 
 circuitName=sudoku_pedersen
+
+if [ $circuitName == "sudoku_pedersen" ]; then
+    curveName=bn128
+elif [ $circuitName == "sudoku_sha256" ]; then
+    curveName=bls12381
+fi
 
 snarkjsCmd="node /home/bishal/works/venture23-zkp/icon-snarkjs/build/cli.cjs"
 # snarkjsCmd="snarkjs"
 
 ptauDir="../ptau"
 buildDir="build_${circuitName}"
-inputFileName="../input.json"
+inputFileName="../inputs/${circuitName}.json"
 witnessFileName="witness.wtns"
 finalPotFileName="$ptauDir/pot${maxConstraints}_${curveName}.ptau"
 
@@ -48,4 +53,4 @@ node ${circuitName}_js/generate_witness.js ${circuitName}_js/${circuitName}.wasm
 
 $snarkjsCmd groth16 prove ${circuitName}_0001.zkey witness.wtns proof.json public.json
 
-$snarkjsCmd zkey export javacalldata
+$snarkjsCmd zkey export javacalldata | tee calldata.json
