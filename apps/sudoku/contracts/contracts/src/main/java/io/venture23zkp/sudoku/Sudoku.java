@@ -2,6 +2,8 @@
 package io.venture23zkp.sudoku;
 
 import java.math.BigInteger;
+import java.util.Map;
+import scorex.util.HashMap;
 
 import score.ArrayDB;
 import score.Context;
@@ -10,13 +12,16 @@ import score.annotation.External;
 
 public class Sudoku {
 
-    private final Verifier verifier;
+    private final Pedersen_Verifier pedersen_verifier;
+    private final Sha256_Verifier sha_verifier;
+
 
     private final DictDB<BigInteger, Board> boards = Context.newDictDB("boards", Board.class);
     public final ArrayDB<BigInteger> boardIds = Context.newArrayDB("boardIds", BigInteger.class);
 
     public Sudoku() {
-        this.verifier = new Verifier();
+        this.pedersen_verifier = new Pedersen_Verifier();
+        this.sha_verifier = new Sha256_Verifier();
 
         addBoard(
                 new BigInteger("12946702913587076100588339357837874244737833722059782620840121604018902625880"),
@@ -79,10 +84,15 @@ public class Sudoku {
     }
 
     @External(readonly = true)
-    public boolean verify(BigInteger boardId, BigInteger[] a, BigInteger[][] b, BigInteger[] c) {
+    public boolean verify(BigInteger boardId, BigInteger[] a, BigInteger[][] b, BigInteger[] c, String verificationType) {
         Context.require(boards.get(boardId) != null, "Board does not exist!");
         BigInteger[] input = new BigInteger[] { boardId };
-        return this.verifier.verifyProof(a, b, c, input);
+
+        if (verificationType.equals("sha")) {
+            return this.sha_verifier.verifyProof(a, b, c, input);
+        } else{
+            return this.pedersen_verifier.verifyProof(a, b, c, input);
+        }
     }
 
 }
