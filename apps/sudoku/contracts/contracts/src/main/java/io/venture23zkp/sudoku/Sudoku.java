@@ -1,4 +1,3 @@
-
 package io.venture23zkp.sudoku;
 
 import java.math.BigInteger;
