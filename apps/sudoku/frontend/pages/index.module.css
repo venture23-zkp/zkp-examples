@@ -15,11 +15,6 @@
     justify-content: center;
     align-items: flex-start;
     gap: 20px;
-
-    @media (max-width: 992px) {
-        flex-direction: column;
-        align-items: center;
-    }
 }
 
 .input {
@@ -33,11 +28,6 @@
     text-align: center;
     border-style: solid;
     border-color: #cbd5e1;
-
-    @media (max-width: 992px) {
-        height: 2rem;
-        width: 2rem;
-    }
 }
 
 .verificationContainer {
@@ -152,4 +142,16 @@
 .disabledButton {
     cursor: initial;
     opacity: 0.4;
+}
+
+
+@media screen and (max-width: 992px) {
+    .sodukuContent {
+        flex-direction: column;
+        align-items: center;
+    }
+    .input {
+        height: 2rem;
+        width: 2rem;
+    }
 }
