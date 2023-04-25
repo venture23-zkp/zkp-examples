@@ -7,10 +7,18 @@
     justify-content: center;
     align-items: center;
     padding: 20px 0;
+}
+
+.sodukuContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
     gap: 20px;
 
     @media (max-width: 992px) {
-        flex-direction: column
+        flex-direction: column;
+        align-items: center;
     }
 }
 
@@ -72,7 +80,8 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
     min-width: 350px;
     overflow: hidden;
-    min-height: 325px;
+    /* min-height: 325px; */
+    min-height: 480px;
 
     display: flex;
     flex-direction: column;

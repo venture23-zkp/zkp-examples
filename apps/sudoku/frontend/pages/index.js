@@ -236,80 +236,82 @@ export default function Sudoku() {
     return board === undefined ? null : (
         <div align="center" className={style.soduku}>
             <Toaster />
-            <div className={style.boardContainer}>
-                <div className={style.boardWarning}>You can only update the input with value 0</div>
-                <div className='board'>
+            <div className={style.sodukuContent}>
+                <div className={style.boardContainer}>
+                    <div className={style.boardWarning}>You can only update the input with value 0</div>
+                    <div className='board'>
+                        {
+                            solved.map((row, rowIndex) => (
+                                <div key={rowIndex}>
+                                    {
+                                        row.map((col, colIndex) => (
+                                            <input
+                                                key={colIndex}
+                                                className={style.input}
+                                                value={col}
+                                                onChange={event => {
+                                                    if (board[rowIndex][colIndex] === 0) {
+                                                        updateSolution(rowIndex, colIndex, event.target.value);
+                                                    }
+                                                }}
+                                            />
+                                        ))
+                                    }
+                                </div>
+                            ))
+                        }
+                    </div>
+                </div>
+                <div className={style.verificationContainer}>
                     {
-                        solved.map((row, rowIndex) => (
-                            <div key={rowIndex}>
+                        circuitStats !== null ? (
+                            <div className={style.circuitStatsContainer}>
+                                <div className={style.tabHeadersContainer}>
+                                    {
+                                        circuits.map((circuit, idx) => (
+                                            <div className={circuit.id === selectedCircuit.id ?
+                                                `${style.tabHeader} ${style.tabHeaderActive}` :
+                                                `${style.tabHeader} ${style.tabHeaderInActive}`
+                                            } onClick={() => setSelectedCircuit(circuit)} key={idx}>
+                                                <h3>{circuit.title}</h3>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
                                 {
-                                    row.map((col, colIndex) => (
-                                        <input
-                                            key={colIndex}
-                                            className={style.input}
-                                            value={col}
-                                            onChange={event => {
-                                                if (board[rowIndex][colIndex] === 0) {
-                                                    updateSolution(rowIndex, colIndex, event.target.value);
-                                                }
-                                            }}
-                                        />
-                                    ))
+                                    circuitStatsLoading ?
+                                        <div className={style.circuitLoadingContainer}>
+                                            <GridLoader
+                                                color={"#4F46ED"}
+                                                loading={circuitStatsLoading}
+                                            />
+                                        </div> :
+                                        <div className={style.tabBody}>
+                                            <div className={style.circuitStats}>
+                                                <div className={style.key}>Curve</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.curve}</div>
+                                                <div className={style.key}>Constraints</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nConstraints}</div>
+                                                <div className={style.key}>Labels</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nLabels}</div>
+                                                <div className={style.key}>Outputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nOutputs}</div>
+                                                <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPrvInputs}</div>
+                                                <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPubInputs}</div>
+                                                <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
+                                                <div className={style.key}>Proof time</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.proofTime}ms</div>
+                                            </div>
+                                            <div>
+                                                <button
+                                                    onClick={handleVerifyClick}
+                                                    className={`${style.verifyButton} ${verificationInProgress ? style.disabledButton : ""}`}
+                                                    disabled={verificationInProgress}
+                                                >
+                                                    Verify
+                                                </button>
+                                            </div>
+                                        </div>
                                 }
                             </div>
-                        ))
+                        ) : null
                     }
                 </div>
-            </div>
-            <div className={style.verificationContainer}>
-                {
-                    circuitStats !== null ? (
-                        <div className={style.circuitStatsContainer}>
-                            <div className={style.tabHeadersContainer}>
-                                {
-                                    circuits.map((circuit, idx) => (
-                                        <div className={circuit.id === selectedCircuit.id ?
-                                            `${style.tabHeader} ${style.tabHeaderActive}` :
-                                            `${style.tabHeader} ${style.tabHeaderInActive}`
-                                        } onClick={() => setSelectedCircuit(circuit)} key={idx}>
-                                            <h3>{circuit.title}</h3>
-                                        </div>
-                                    ))
-                                }
-                            </div>
-                            {
-                                circuitStatsLoading ?
-                                    <div className={style.circuitLoadingContainer}>
-                                        <GridLoader
-                                            color={"#4F46ED"}
-                                            loading={circuitStatsLoading}
-                                        />
-                                    </div> :
-                                    <div className={style.tabBody}>
-                                        <div className={style.circuitStats}>
-                                            <div className={style.key}>Curve</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.curve}</div>
-                                            <div className={style.key}>Constraints</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nConstraints}</div>
-                                            <div className={style.key}>Labels</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nLabels}</div>
-                                            <div className={style.key}>Outputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nOutputs}</div>
-                                            <div className={style.key}>PrvInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPrvInputs}</div>
-                                            <div className={style.key}>PubInputs</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nPubInputs}</div>
-                                            <div className={style.key}>Vars</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.nVars}</div>
-                                            <div className={style.key}>Proof time</div> <div className={style.value}>{circuitStats[selectedCircuit.id]?.proofTime}ms</div>
-                                        </div>
-                                        <div>
-                                            <button
-                                                onClick={handleVerifyClick}
-                                                className={`${style.verifyButton} ${verificationInProgress ? style.disabledButton : ""}`}
-                                                disabled={verificationInProgress}
-                                            >
-                                                Verify
-                                            </button>
-                                        </div>
-                                    </div>
-                            }
-                        </div>
-                    ) : null
-                }
             </div>
         </div >
     );
