@@ -238,7 +238,7 @@ export default function Sudoku() {
             <Toaster />
             <div className={style.sodukuContent}>
                 <div className={style.boardContainer}>
-                    <div className={style.boardWarning}>You can only update the input with value 0</div>
+                    <div className={style.boardWarning}>You can only update the empty cells!</div>
                     <div className='board'>
                         {
                             solved.map((row, rowIndex) => (
@@ -247,11 +247,18 @@ export default function Sudoku() {
                                         row.map((col, colIndex) => (
                                             <input
                                                 key={colIndex}
+                                                disabled={board[rowIndex][colIndex] !== 0}
                                                 className={style.input}
-                                                value={col}
+                                                style={{
+                                                    ...(rowIndex > 0 && rowIndex % 3 === 0 ? { borderTopWidth: 4 } : {}),
+                                                    ...(colIndex > 0 && colIndex % 3 === 0 ? { borderLeftWidth: 4 } : {}),
+                                                    ...(board[rowIndex][colIndex] === 0 ? { backgroundColor: "rgba(255,255,255,0.1)" } : {})
+                                                }}
+                                                value={col || ""}
                                                 onChange={event => {
-                                                    if (board[rowIndex][colIndex] === 0) {
-                                                        updateSolution(rowIndex, colIndex, event.target.value);
+                                                    const value = event.target.value;
+                                                    if (board[rowIndex][colIndex] === 0 && value >= 1 && value <= 9) {
+                                                        updateSolution(rowIndex, colIndex, value);
                                                     }
                                                 }}
                                             />
